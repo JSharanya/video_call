@@ -1,0 +1,102 @@
+import {
+  CallingState,
+  StreamCall,
+  StreamVideo,
+  StreamVideoClient,
+
+  useCallStateHooks,
+  ParticipantView,
+  StreamTheme
+} from "@stream-io/video-react-sdk";
+
+const apiKey = "mmhfdzb5evj2";
+const token =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Byb250by5nZXRzdHJlYW0uaW8iLCJzdWIiOiJ1c2VyL1p1Y2t1c3MiLCJ1c2VyX2lkIjoiWnVja3VzcyIsInZhbGlkaXR5X2luX3NlY29uZHMiOjYwNDgwMCwiaWF0IjoxNzI3OTYxMjQyLCJleHAiOjE3Mjg1NjYwNDJ9.M8lMnBgetx31S6T8BfjWwJVIRpqTnIYcFtxNmiobd4Q";
+const userId = "Zuckuss";
+const callId = "qkO1QU9ejvZQ";
+
+// set up the user object
+const user = {
+  id: userId,
+  name: "Oliver",
+  image: "https://getstream.io/random_svg/?id=oliver&name=Oliver",
+};
+
+const client = new StreamVideoClient({ apiKey, user, token });
+const call = client.call("default", callId);
+call.join({ create: true });
+
+function App() {
+  return (
+    <StreamVideo client={client}>
+      <StreamCall call={call}>
+        <MyUILayout />
+      </StreamCall>
+    </StreamVideo>
+  );
+}
+
+export const MyUILayout = () => {
+
+
+  const {
+    useCallCallingState,
+
+    useLocalParticipant,
+    useRemoteParticipants,
+  } = useCallStateHooks();
+  const callingState = useCallCallingState();
+
+  const localParticipant = useLocalParticipant();
+  const remoteParticipants = useRemoteParticipants();
+
+  if (callingState !== CallingState.JOINED) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+   
+      <StreamTheme>
+        <MyParticipantList participants={remoteParticipants} />
+        <MyFloatingLocalParticipant participant={localParticipant} />
+      </StreamTheme>
+  
+  );
+};
+
+export const MyParticipantList = (props) => {
+  const { participants } = props;
+  return (
+    <div style={{ display: "flex", flexDirection: "row", gap: "8px" , width:'100w',}}>
+      {participants.map((participant) => (
+        <div style={{width:'100%', aspectRatio:'3/2'}}>
+        <ParticipantView
+          muteAudio
+          participant={participant}
+          key={participant.sessionId}
+        /></div>
+      ))}
+    </div>
+  );
+};
+
+export const MyFloatingLocalParticipant = (props) => {
+  const { participant } = props;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: "15px",
+        left: "15px",
+        width: "240px",
+        height: "135px",
+        boxShadow: "rgba(0, 0, 0, 0.1) 0px 0px 10px 3px",
+        borderRadius: "12px",
+      }}
+    >
+      <ParticipantView participant={participant} />
+    </div>
+  );
+};
+
+export default App;
